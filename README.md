@@ -123,9 +123,11 @@ OPENAI_API_KEY: <your_openai_api_key>
 - **HP AI Studio MLflow Model Service:**
 -  ```bash
 -  export MODEL_PROVIDER=hp_studio
+   ```
 -  # URL for MLflow model service (from the deployed service's Swagger UI)
 -  export MLFLOW_SERVER_URL=<service_url>
 -  # Registered model name in MLflow registry
+   ```bash
 -  export STUDIO_MODEL_NAME=llama2-7b
 -  ```
 + **NeMo LLM (NeMo Framework image):**
@@ -137,9 +139,11 @@ OPENAI_API_KEY: <your_openai_api_key>
 + **HP AI Studio MLflow Model Service:**
 +  ```bash
 +  export MODEL_PROVIDER=hp_studio
+    ```
 +  # URL for MLflow model service (from the deployed service's Swagger UI)
 +  export MLFLOW_SERVER_URL=<service_url>
 +  # Registered model name in MLflow registry
+   ```bash
 +  export STUDIO_MODEL_NAME=llama2-7b
 +  ```
 4. Start the deployment.
