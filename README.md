@@ -121,15 +121,15 @@ OPENAI_API_KEY: <your_openai_api_key>
   export LOCAL_MODEL_PATH=/home/jovyan/datafabric/llama2-7b/ggml-model-f16-Q5_K_M.gguf
   ```
 - **HP AI Studio MLflow Model Service:**
--  ```bash
--  export MODEL_PROVIDER=hp_studio
-   ```
+  ```bash
+  export MODEL_PROVIDER=hp_studio
+  ```
 -  # URL for MLflow model service (from the deployed service's Swagger UI)
 -  export MLFLOW_SERVER_URL=<service_url>
 -  # Registered model name in MLflow registry
-   ```bash
--  export STUDIO_MODEL_NAME=llama2-7b
--  ```
+  ```bash
+  export STUDIO_MODEL_NAME=llama2-7b
+  ```
 + **NeMo LLM (NeMo Framework image):**
   ```bash
   export MODEL_PROVIDER=nemo
@@ -143,9 +143,9 @@ OPENAI_API_KEY: <your_openai_api_key>
 +  # URL for MLflow model service (from the deployed service's Swagger UI)
 +  export MLFLOW_SERVER_URL=<service_url>
 +  # Registered model name in MLflow registry
-   ```bash
-+  export STUDIO_MODEL_NAME=llama2-7b
-+  ```
+  ```bash
+  export STUDIO_MODEL_NAME=llama2-7b
+  ```
 4. Start the deployment.
 5. Once deployed, click the **Service URL** to access the demo UI.
 6. Upload your medical documents and click **Generate Summary**.
