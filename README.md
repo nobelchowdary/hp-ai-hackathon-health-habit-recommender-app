@@ -1,0 +1,113 @@
+# 🏥 Medical Report Analyzer & Healthy Habits Recommender
+
+## Content
+- Project Description
+- Overview
+- Models and Methods
+- Project Structure
+- Setup
+- MLflow & Deployment
+- Usage
+- Judging and Testing
+- Open-source Repository
+- Contact and Support
+ 
+## Project Description
+**Technical Workflow:** This solution uses HP AI Studio to orchestrate OCR-based text extraction and large language model calls to generate medical summaries, health suggestions, and food recommendations.
+
+**Challenges & Solutions:** Handling multi-format medical documents (PDFs, scans), ensuring accurate text extraction and concise AI-generated outputs, and packaging the end-to-end pipeline for reproducible deployment in AI Studio.
+
+**HP AI Studio Features Leveraged:** Custom Web App deployments, built-in MLflow model registry and versioning, automatic Swagger UI generation, GPU/CPU compute profiles, and environment management.
+
+**Lessons Learned & Best Practices:** Use environment variables for sensitive keys, leverage MLflow pyfunc for consistent model packaging, maintain clear separation of frontend and backend, and document workflows thoroughly for reproducibility.
+
+## Overview
+This application provides a simple web interface to generate summaries, health suggestions, and food recommendations from medical documents (PDFs or images) using a Flask backend and the OpenAI API.
+
+## Models and Methods
+- **OCR Pipeline:** Text extraction via Tesseract (`pytesseract`) and PyMuPDF (`fitz`).
+- **Language Model:** Summarization and suggestions generated using OpenAI GPT-4 via the `openai` Python SDK.
+- **Model Packaging:** Packaged as an MLflow pyfunc model for versioning and reproducibility.
+- **API Hosting:** Deployed as a custom AI Studio Web App with built-in Swagger UI for API exploration.
+
+## Project Structure
+```
+├── app.py              # Flask backend application
+├── config
+│   └── secrets.yaml    # API keys (gitignored; see config/secrets.yaml.example)
+├── data
+│   └── raw             # Upload and temporary storage of documents
+├── demo
+│   └── index.html      # Static frontend for user interaction
+├── docs
+│   └── architecture.md # Application architecture details
+├── requirements.txt    # Python dependencies
+└── README.md           # Project overview and usage instructions
+```
+
+## Setup
+
+### Step 1: Create an AI Studio Project
+1. Create a **New Project** in AI Studio.
+
+### Step 2: Create a Workspace
+1. Select the **NeMo Framework** (or another image with Tesseract & OpenAI support) as the base image.
+
+### Step 3: Verify Project Files
+1. Clone or upload this repository to your workspace.
+2. Ensure the following structure:
+   ```
+   ├── app.py
+   ├── config
+   │   └── secrets.yaml
+   ├── data
+   │   └── raw
+   ├── demo
+   │   └── index.html
+   ├── docs
+   │   └── architecture.md
+   ├── requirements.txt
+   └── README.md
+   ```
+
+3. Copy `config/secrets.yaml.example` to `config/secrets.yaml` and update with your OpenAI API key:
+
+```bash
+cp config/secrets.yaml.example config/secrets.yaml
+```
+
+## MLflow & Deployment
+
+### Step 1: Deploy the Model on AI Studio
+1. Navigate to **Deployments > New Service** in AI Studio.
+2. Choose **Model Service**, select the registered MLflow model, and configure compute (GPU/CPU).
+3. Start the deployment. AI Studio will provide a Swagger UI for the `/invocations` endpoint.
+
+## Usage
+
+### Step 1: Deploy the Service
+1. Navigate to **Deployments > New Service** in AI Studio.
+2. Choose **Custom Web App**, provide a name (e.g., `MedicalDocSummarization`), and set `app.py` as the entry point.
+3. Configure environment variables (e.g., `OPENAI_API_KEY`).
+4. Start the deployment.
+5. Once deployed, click the **Service URL** to access the demo UI.
+6. Upload your medical documents and click **Generate Summary**.
+
+## Judging and Testing
+
+To evaluate the service:
+1. Upload sample medical documents via the demo UI or send a POST request to `/invocations`:
+
+```bash
+curl -X POST "$SERVICE_URL/invocations" \
+  -F "files=@sample_report.pdf"
+```
+2. Verify the JSON response contains `summaries`, `healthSuggestions`, and `foodSuggestions`.
+
+## Open-source Repository
+
+This project is open-source under the MIT License. View or contribute at:
+https://github.com/nobelchowdary/medical-report-analyzer-healthy-habits-recommender
+
+## Contact and Support
+For issues or questions, please open an issue in the repository or contact the maintainer.
