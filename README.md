@@ -51,9 +51,17 @@ This application provides a simple web interface to generate summaries, health s
 1. Create a **New Project** in AI Studio.
 
 ### Step 2: Create a Workspace
-1. Select the **NeMo Framework** (or another image with Tesseract & OpenAI support) as the base image.
+1. Select the **Local GenAI** workspace image in AI Studio (this image includes llama.cpp and necessary LLM libraries).
 
-### Step 3: Verify Project Files
+### Step 3: Download the LLaMA2-7B Model
+1. In AI Studio, open the **Models** tab and download the **LLaMA2-7B** model:
+   - **Model Name**: `llama2-7b`
+   - **Model Source**: `AWS S3`
+   - **S3 URI**: `s3://149536453923-hpaistudio-public-assets/llama2-7b`
+   - **Bucket Region**: `us-west-2`
+2. Confirm the model appears under `datafabric/llama2-7b` in your workspace. If it does not appear, restart the workspace.
+
+### Step 4: Verify Project Files
 1. Clone or upload this repository to your workspace.
 2. Ensure the following structure:
    ```
@@ -70,25 +78,56 @@ This application provides a simple web interface to generate summaries, health s
    └── README.md
    ```
 
-3. Copy `config/secrets.yaml.example` to `config/secrets.yaml` and update with your OpenAI API key:
+3. Edit `config/secrets.yaml` and set your OpenAI API key (if using OpenAI):
 
-```bash
-cp config/secrets.yaml.example config/secrets.yaml
+```yaml
+OPENAI_API_KEY: <your_openai_api_key>
 ```
 
 ## MLflow & Deployment
 
-### Step 1: Deploy the Model on AI Studio
-1. Navigate to **Deployments > New Service** in AI Studio.
-2. Choose **Model Service**, select the registered MLflow model, and configure compute (GPU/CPU).
-3. Start the deployment. AI Studio will provide a Swagger UI for the `/invocations` endpoint.
+### Register & Deploy the LLaMA2-7B Model
+
+1. In your AI Studio workspace terminal, register the LLaMA2-7B model to MLflow:
+   ```bash
+   python register_llama_model.py \
+     --model-path /home/jovyan/datafabric/llama2-7b/ggml-model-f16-Q5_K_M.gguf \
+     --model-name llama2-7b \
+     --register
+   ```
+   This logs and registers the model under the name `llama2-7b` in the MLflow registry.
+
+2. Deploy the registered model as a Model Service in AI Studio:
+   1. Navigate to **Deployments > New Service**.
+   2. Choose **Model Service**, select **llama2-7b** from the MLflow registry, and configure compute (GPU/CPU).
+   3. Start the deployment. AI Studio will provide a Swagger UI for the `/invocations` endpoint.
+   4. Copy the **Service URL** for later.
 
 ## Usage
 
 ### Step 1: Deploy the Service
 1. Navigate to **Deployments > New Service** in AI Studio.
 2. Choose **Custom Web App**, provide a name (e.g., `MedicalDocSummarization`), and set `app.py` as the entry point.
-3. Configure environment variables (e.g., `OPENAI_API_KEY`).
+3. Configure environment variables for model provider:
+
+- **OpenAI API (default):**
+  ```bash
+  export MODEL_PROVIDER=openai
+  export OPENAI_API_KEY=<your_openai_api_key>
+  ```
+- **Local LLaMA2-7B model:**
+  ```bash
+  export MODEL_PROVIDER=local
+  export LOCAL_MODEL_PATH=/home/jovyan/datafabric/llama2-7b/ggml-model-f16-Q5_K_M.gguf
+  ```
+- **HP AI Studio MLflow Model Service:**
+  ```bash
+  export MODEL_PROVIDER=hp_studio
+  # URL for MLflow model service (from the deployed service's Swagger UI)
+  export MLFLOW_SERVER_URL=<service_url>
+  # Registered model name in MLflow registry
+  export STUDIO_MODEL_NAME=llama2-7b
+  ```
 4. Start the deployment.
 5. Once deployed, click the **Service URL** to access the demo UI.
 6. Upload your medical documents and click **Generate Summary**.
