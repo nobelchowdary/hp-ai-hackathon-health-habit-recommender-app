@@ -24,7 +24,7 @@ if not secrets_path.exists():
     raise FileNotFoundError(f"Secrets file not found: {secrets_path}")
 with open(secrets_path, "r") as f:
     secrets = yaml.safe_load(f)
-# Select model provider: 'openai' (default) or 'local' for LLaMA2-7B via llama.cpp
+# Select model provider: 'openai', 'local' (llama.cpp), 'nemo' (NeMo LLM), or 'hp_studio' (MLflow model service)
 MODEL_PROVIDER = os.environ.get("MODEL_PROVIDER", "openai").lower()
 if MODEL_PROVIDER == "openai":
     api_key = secrets.get("OPENAI_API_KEY")
@@ -48,6 +48,18 @@ elif MODEL_PROVIDER == "local":
         stop=[],
         temperature=0.7,
     )
+elif MODEL_PROVIDER == "nemo":
+    # NVIDIA NeMo LLM model (pre-downloaded .nemo file in workspace)
+    try:
+        import nemo.collections.nlp as nemo_nlp
+        from nemo.collections.nlp.models.language_modeling.megatron_gpt_model import MegatronGPTModel
+    except ImportError as e:
+        raise ImportError(f"NeMo package not available: {e}")
+    NEMO_MODEL_PATH = os.environ.get(
+        "NEMO_MODEL_PATH",
+        "/home/jovyan/datafabric/llama2-7b-chat/llama2-7b-chat.nemo"
+    )
+    llm = MegatronGPTModel.restore_from(restore_path=NEMO_MODEL_PATH)
 elif MODEL_PROVIDER == "hp_studio":
     # HP AI Studio MLflow model serving endpoint
     MLFLOW_SERVER_URL = os.environ.get("MLFLOW_SERVER_URL", "http://localhost:1234")
@@ -99,6 +111,18 @@ def ask_llm(prompt: str, model="gpt-4", temperature=0.7) -> str:
             return str(result)
         except Exception as e:
             return f"Error calling HP AI Studio model: {e}"
+    elif MODEL_PROVIDER == "nemo":
+        try:
+            # Generate text with NeMo MegatronGPTModel
+            # Assumes llm has a .generate method
+            outputs = llm.generate(prompts=[prompt], max_tokens=1024)
+            # outputs may be list of strings or dicts
+            first = outputs[0]
+            if isinstance(first, dict):
+                return first.get("text", str(first))
+            return str(first)
+        except Exception as e:
+            return f"Error calling NeMo LLM: {e}"
     else:
         try:
             response = client.chat.completions.create(

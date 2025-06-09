@@ -58,10 +58,28 @@ def main():
     # Start MLflow run
     with mlflow.start_run() as run:
         artifacts = {"model_path": args.model_path}
+        # Define the conda environment for the model (required for HP AI Studio Model Service)
+        conda_env = {
+            'name': 'llama2-7b-env',
+            'channels': ['defaults', 'conda-forge'],
+            'dependencies': [
+                'python=3.10',
+                'pip',
+                {
+                    'pip': [
+                        'llama-cpp-python',
+                        'langchain-community',
+                        'pandas'
+                    ]
+                }
+            ]
+        }
+        # Log and optionally register the model, including conda environment
         mlflow.pyfunc.log_model(
             artifact_path=args.artifact_path,
             python_model=Llama2Model(),
             artifacts=artifacts,
+            conda_env=conda_env,
             registered_model_name=(args.model_name if args.register else None)
         )
         print(

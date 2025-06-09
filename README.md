@@ -33,6 +33,7 @@ This application provides a simple web interface to generate summaries, health s
 ## Project Structure
 ```
 ├── app.py              # Flask backend application
+├── register_llama_model.py
 ├── config
 │   └── secrets.yaml    # API keys (gitignored; see config/secrets.yaml.example)
 ├── data
@@ -51,21 +52,20 @@ This application provides a simple web interface to generate summaries, health s
 1. Create a **New Project** in AI Studio.
 
 ### Step 2: Create a Workspace
-1. Select the **Local GenAI** workspace image in AI Studio (this image includes llama.cpp and necessary LLM libraries).
+1. Select a workspace image in AI Studio:
+   - **Local GenAI**: Includes `llama.cpp` and is suited for GGUF llama models via llama.cpp.
+   - **NeMo Framework**: Pre-configured with NVIDIA NeMo for LLMs, including `llama2-7b-chat.nemo` support.
 
-### Step 3: Download the LLaMA2-7B Model
-1. In AI Studio, open the **Models** tab and download the **LLaMA2-7B** model:
-   - **Model Name**: `llama2-7b`
-   - **Model Source**: `AWS S3`
-   - **S3 URI**: `s3://149536453923-hpaistudio-public-assets/llama2-7b`
-   - **Bucket Region**: `us-west-2`
-2. Confirm the model appears under `datafabric/llama2-7b` in your workspace. If it does not appear, restart the workspace.
+### Step 3: Use the LLaMA2-7B-Chat Model in NeMo Framework
+1. If you chose the **NeMo Framework** image, the `llama2-7b-chat.nemo` model should already be available in your workspace (e.g., under `/home/jovyan/datafabric/llama2-7b-chat/`).
+2. Otherwise, you can download model from `models` section in `asset` in AI Studio to `datafabric/llama2-7b-chat/` in your workspace.
 
 ### Step 4: Verify Project Files
 1. Clone or upload this repository to your workspace.
 2. Ensure the following structure:
    ```
    ├── app.py
+   ├── register_llama_model.py
    ├── config
    │   └── secrets.yaml
    ├── data
@@ -121,13 +121,27 @@ OPENAI_API_KEY: <your_openai_api_key>
   export LOCAL_MODEL_PATH=/home/jovyan/datafabric/llama2-7b/ggml-model-f16-Q5_K_M.gguf
   ```
 - **HP AI Studio MLflow Model Service:**
+-  ```bash
+-  export MODEL_PROVIDER=hp_studio
+-  # URL for MLflow model service (from the deployed service's Swagger UI)
+-  export MLFLOW_SERVER_URL=<service_url>
+-  # Registered model name in MLflow registry
+-  export STUDIO_MODEL_NAME=llama2-7b
+-  ```
++ **NeMo LLM (NeMo Framework image):**
   ```bash
-  export MODEL_PROVIDER=hp_studio
-  # URL for MLflow model service (from the deployed service's Swagger UI)
-  export MLFLOW_SERVER_URL=<service_url>
-  # Registered model name in MLflow registry
-  export STUDIO_MODEL_NAME=llama2-7b
+  export MODEL_PROVIDER=nemo
+  # Path to local NeMo .nemo file
+  export NEMO_MODEL_PATH=/home/jovyan/datafabric/llama2-7b-chat/llama2-7b-chat.nemo
   ```
++ **HP AI Studio MLflow Model Service:**
++  ```bash
++  export MODEL_PROVIDER=hp_studio
++  # URL for MLflow model service (from the deployed service's Swagger UI)
++  export MLFLOW_SERVER_URL=<service_url>
++  # Registered model name in MLflow registry
++  export STUDIO_MODEL_NAME=llama2-7b
++  ```
 4. Start the deployment.
 5. Once deployed, click the **Service URL** to access the demo UI.
 6. Upload your medical documents and click **Generate Summary**.
